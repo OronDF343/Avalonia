@@ -195,14 +195,14 @@ namespace Avalonia.Controls.UnitTests.Presenters
             }
         }
 
-        [Fact]
-        public void Should_Not_Create_Virtualizer_Before_Panel()
-        {
-            var target = CreateTarget();
+        ////[Fact]
+        ////public void Should_Not_Create_Virtualizer_Before_Panel()
+        ////{
+        ////    var target = CreateTarget();
 
-            Assert.Null(target.Panel);
-            Assert.Null(target.Virtualizer);
-        }
+        ////    Assert.Null(target.Panel);
+        ////    Assert.Null(target.Virtualizer);
+        ////}
 
         [Fact]
         public void Changing_VirtualizationMode_None_To_Simple_Should_Update_Control()

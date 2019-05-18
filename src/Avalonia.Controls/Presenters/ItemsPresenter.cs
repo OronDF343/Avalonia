@@ -33,9 +33,6 @@ namespace Avalonia.Controls.Presenters
             KeyboardNavigation.TabNavigationProperty.OverrideDefaultValue(
                 typeof(ItemsPresenter),
                 KeyboardNavigationMode.Once);
-
-            VirtualizationModeProperty.Changed
-                .AddClassHandler<ItemsPresenter>(x => x.VirtualizationModeChanged);
         }
 
         /// <summary>
@@ -73,29 +70,20 @@ namespace Avalonia.Controls.Presenters
             }
         }
         /// <inheritdoc/>
-        bool ILogicalScrollable.IsLogicalScrollEnabled
-        {
-            get { return Virtualizer?.IsLogicalScrollEnabled ?? false; }
-        }
+        bool ILogicalScrollable.IsLogicalScrollEnabled => false;
 
         /// <inheritdoc/>
-        Size IScrollable.Extent => Virtualizer?.Extent ?? Size.Empty;
+        Size IScrollable.Extent => Size.Empty;
 
         /// <inheritdoc/>
         Vector IScrollable.Offset
         {
-            get { return Virtualizer?.Offset ?? new Vector(); }
-            set
-            {
-                if (Virtualizer != null)
-                {
-                    Virtualizer.Offset = CoerceOffset(value);
-                }
-            }
+            get => new Vector();
+            set { }
         }
 
         /// <inheritdoc/>
-        Size IScrollable.Viewport => Virtualizer?.Viewport ?? Bounds.Size;
+        Size IScrollable.Viewport => Size.Empty;
 
         /// <inheritdoc/>
         Action ILogicalScrollable.InvalidateScroll { get; set; }
@@ -106,8 +94,6 @@ namespace Avalonia.Controls.Presenters
         /// <inheritdoc/>
         Size ILogicalScrollable.PageScrollSize => new Size(0, 1);
 
-        internal ItemVirtualizer Virtualizer { get; private set; }
-
         /// <inheritdoc/>
         bool ILogicalScrollable.BringIntoView(IControl target, Rect targetRect)
         {
@@ -117,32 +103,27 @@ namespace Avalonia.Controls.Presenters
         /// <inheritdoc/>
         IControl ILogicalScrollable.GetControlInDirection(NavigationDirection direction, IControl from)
         {
-            return Virtualizer?.GetControlInDirection(direction, from);
+            return null;
         }
 
         public override void ScrollIntoView(object item)
         {
-            Virtualizer?.ScrollIntoView(item);
         }
 
         /// <inheritdoc/>
         protected override Size MeasureOverride(Size availableSize)
         {
-            return Virtualizer?.MeasureOverride(availableSize) ?? Size.Empty;
+            return base.MeasureOverride(availableSize);
         }
 
         protected override Size ArrangeOverride(Size finalSize)
         {
-            return Virtualizer?.ArrangeOverride(finalSize) ?? Size.Empty;
+            return base.ArrangeOverride(finalSize);
         }
 
         /// <inheritdoc/>
         protected override void PanelCreated(IPanel panel)
         {
-            Virtualizer?.Dispose();
-            Virtualizer = ItemVirtualizer.Create(this);
-            ((ILogicalScrollable)this).InvalidateScroll?.Invoke();
-
             KeyboardNavigation.SetTabNavigation(
                 (InputElement)Panel,
                 KeyboardNavigation.GetTabNavigation(this));
@@ -150,22 +131,7 @@ namespace Avalonia.Controls.Presenters
 
         protected override void ItemsChanged(NotifyCollectionChangedEventArgs e)
         {
-            Virtualizer?.ItemsChanged(Items, e);
-        }
-
-        private Vector CoerceOffset(Vector value)
-        {
-            var scrollable = (ILogicalScrollable)this;
-            var maxX = Math.Max(scrollable.Extent.Width - scrollable.Viewport.Width, 0);
-            var maxY = Math.Max(scrollable.Extent.Height - scrollable.Viewport.Height, 0);
-            return new Vector(Clamp(value.X, 0, maxX), Clamp(value.Y, 0, maxY));
-        }
-
-        private void VirtualizationModeChanged(AvaloniaPropertyChangedEventArgs e)
-        {
-            Virtualizer?.Dispose();
-            Virtualizer = ItemVirtualizer.Create(this);
-            ((ILogicalScrollable)this).InvalidateScroll?.Invoke();
+            base.ItemsChanged(e);
         }
     }
 }
