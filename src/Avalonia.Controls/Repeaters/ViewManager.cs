@@ -36,11 +36,11 @@ namespace Avalonia.Controls.Repeaters
             {
                 // check if this is the anchor made through repeater in preparation 
                 // for a bring into view.
-                var madeAnchor = _owner.MadeAnchor();
+                var madeAnchor = _owner.MadeAnchor;
                 if (madeAnchor != null)
                 {
                     var anchorVirtInfo = ItemsRepeater.TryGetVirtualizationInfo(madeAnchor);
-                    if (anchorVirtInfo->Index() == index)
+                    if (anchorVirtInfo.Index == index)
                     {
                         element = madeAnchor;
                     }
@@ -53,12 +53,12 @@ namespace Avalonia.Controls.Repeaters
             var virtInfo = ItemsRepeater.TryGetVirtualizationInfo(element);
             if (suppressAutoRecycle)
             {
-                virtInfo->AutoRecycleCandidate(false);
+                virtInfo.AutoRecycleCandidate = false;
             }
             else
             {
-                virtInfo->AutoRecycleCandidate(true);
-                virtInfo->KeepAlive(true);
+                virtInfo.AutoRecycleCandidate = true;
+                virtInfo.KeepAlive = true;
             }
 
             return element;
@@ -117,13 +117,13 @@ namespace Avalonia.Controls.Repeaters
             context.Element = element;
             context.Parent = _owner;
 
-            _owner.ItemTemplateShim().RecycleElement(context);
+            _owner.ItemTemplate.RecycleElement(context);
 
             context.Element = null;
             context.Parent = null;
 
             virtInfo.MoveOwnershipToElementFactory();
-            _phaser.StopPhasing(element, virtInfo);
+            //_phaser.StopPhasing(element, virtInfo);
             if (_lastFocusedElement == element)
             {
                 // Focused element is going away. Remove the tracked last focused element
@@ -165,15 +165,13 @@ namespace Avalonia.Controls.Repeaters
             int nextIndex = int.MaxValue;
             IControl nextElement = null;
             IControl previousElement = null;
-            var children = _owner.Children;
 
-            for (var i = 0u; i < children.Count; ++i)
+            foreach (var child in _owner.Children)
             {
-                var child = children.GetAt(i);
                 var virtInfo = ItemsRepeater.TryGetVirtualizationInfo(child);
-                if (virtInfo && virtInfo->IsHeldByLayout())
+                if (virtInfo?.IsHeldByLayout == true)
                 {
-                    const int currentIndex = virtInfo->Index();
+                    int currentIndex = virtInfo.Index;
                     if (currentIndex < clearedIndex)
                     {
                         if (currentIndex > previousIndex)
@@ -203,12 +201,12 @@ namespace Avalonia.Controls.Repeaters
                 focusCandidate = nextElement as IControl;
                 if (focusCandidate != null)
                 {
-                    var firstFocus = FocusManager.FindFirstFocusableElement(nextElement);
+                    ////var firstFocus = FocusManager.FindFirstFocusableElement(nextElement);
 
-                    if (firstFocus != null)
-                    {
-                        focusCandidate = firstFocus as IControl;
-                    }
+                    ////if (firstFocus != null)
+                    ////{
+                    ////    focusCandidate = firstFocus as IControl;
+                    ////}
                 }
             }
 
@@ -217,12 +215,12 @@ namespace Avalonia.Controls.Repeaters
                 focusCandidate = previousElement as IControl;
                 if (previousElement != null)
                 {
-                    var lastFocus = FocusManager.FindLastFocusableElement(previousElement);
+                    ////var lastFocus = FocusManager.FindLastFocusableElement(previousElement);
 
-                    if (lastFocus != null)
-                    {
-                        focusCandidate = lastFocus as IControl;
-                    }
+                    ////if (lastFocus != null)
+                    ////{
+                    ////    focusCandidate = lastFocus as IControl;
+                    ////}
                 }
             }
 
@@ -250,7 +248,7 @@ namespace Avalonia.Controls.Repeaters
                 var elementInfo = _pinnedPool[i];
                 var virtInfo = elementInfo.VirtualizationInfo;
 
-                //MUX_ASSERT(virtInfo->Owner() == ElementOwner.PinnedPool);
+                //MUX_ASSERT(virtInfo.Owner() == ElementOwner.PinnedPool);
 
                 if (!virtInfo.IsPinned)
                 {
@@ -310,11 +308,8 @@ namespace Avalonia.Controls.Repeaters
                         if (newIndex <= _lastRealizedElementIndexHeldByLayout)
                         {
                             _lastRealizedElementIndexHeldByLayout += newCount;
-                            var children = _owner.Children;
-                            var childCount = children.Size();
-                            for (var i = 0u; i < childCount; ++i)
+                            foreach (var element in _owner.Children)
                             {
-                                var element = children.GetAt(i);
                                 var virtInfo = ItemsRepeater.GetVirtualizationInfo(element);
                                 var dataIndex = virtInfo.Index;
 
@@ -377,10 +372,8 @@ namespace Avalonia.Controls.Repeaters
                         {
                             // countChange > 0 : countChange items were added
                             // countChange < 0 : -countChange  items were removed
-                            var children = _owner.Children;
-                            for (var i = 0u; i < children.Count; ++i)
+                            foreach (var element in _owner.Children)
                             {
-                                var element = children.GetAt(i);
                                 var virtInfo = ItemsRepeater.GetVirtualizationInfo(element);
                                 var dataIndex = virtInfo.Index;
 
@@ -403,10 +396,8 @@ namespace Avalonia.Controls.Repeaters
                     {
                         var oldStartIndex = args.OldStartingIndex;
                         var oldCount = args.OldItems.Count;
-                        var children = _owner.Children;
-                        for (var i = 0u; i < children.Size(); ++i)
+                        foreach (var element in _owner.Children)
                         {
-                            var element = children.GetAt(i);
                             var virtInfo = ItemsRepeater.GetVirtualizationInfo(element);
                             var dataIndex = virtInfo.Index;
 
@@ -436,10 +427,8 @@ namespace Avalonia.Controls.Repeaters
 
                     // Walk through all the elements and make sure they are cleared, they will go into
                     // the stable id reset pool.
-                    var children = _owner.Children;
-                    for (var i = 0u; i < children.Size(); ++i)
+                    foreach (var element in _owner.Children)
                     {
-                        var element = children.GetAt(i);
                         var virtInfo = ItemsRepeater.GetVirtualizationInfo(element);
                         if (virtInfo.IsRealized && virtInfo.AutoRecycleCandidate)
                         {
@@ -480,7 +469,7 @@ namespace Avalonia.Controls.Repeaters
                     // TODO: Task 14204306: ItemsRepeater: Find better focus candidate when focused element is deleted in the ItemsSource.
                     // Focused element is getting cleared. Need to figure out semantics on where
                     // focus should go when the focused element is removed from the data collection.
-                    ClearElement(entry.second.get(), true /* isClearedDueToCollectionChange */);
+                    ClearElement(entry.Value, true /* isClearedDueToCollectionChange */);
                 }
 
                 _resetPool.Clear();
@@ -507,18 +496,16 @@ namespace Avalonia.Controls.Repeaters
                 //MUX_ASSERT((m_firstRealizedElementIndexHeldByLayout == FirstRealizedElementIndexDefault && m_lastRealizedElementIndexHeldByLayout == LastRealizedElementIndexDefault) ||
                 //    (m_firstRealizedElementIndexHeldByLayout != FirstRealizedElementIndexDefault && m_lastRealizedElementIndexHeldByLayout != LastRealizedElementIndexDefault));
 
-                var children = _owner.Children;
-                for (var i = 0u; i < children.Size(); ++i)
+                foreach (var child in _owner.Children)
                 {
-                    var child = children.GetAt(i);
                     var virtInfo = ItemsRepeater.TryGetVirtualizationInfo(child);
-                    if (virtInfo && virtInfo.IsHeldByLayout)
+                    if (virtInfo?.IsHeldByLayout == true)
                     {
                         // Only give back elements held by layout. If someone else is holding it, they will be served by other methods.
-                        const int childIndex = virtInfo->Index();
+                        int childIndex = virtInfo.Index;
                         _firstRealizedElementIndexHeldByLayout = Math.Min(_firstRealizedElementIndexHeldByLayout, childIndex);
                         _lastRealizedElementIndexHeldByLayout = Math.Max(_lastRealizedElementIndexHeldByLayout, childIndex);
-                        if (virtInfo->Index() == index)
+                        if (virtInfo.Index == index)
                         {
                             element = child;
                             // If we have valid first/last indices, we don't have to walk the rest, but if we 
@@ -581,13 +568,13 @@ namespace Avalonia.Controls.Repeaters
         {
             // The view generator is the provider of last resort.
 
-            var itemTemplateFactory = _owner.ItemTemplateShim;
-            if (!itemTemplateFactory)
+            var itemTemplateFactory = _owner.ItemTemplate;
+            if (itemTemplateFactory == null)
             {
                 // If no ItemTemplate was provided, use a default 
                 var factory = FuncDataTemplate.Default;
                 _owner.ItemTemplate = factory;
-                itemTemplateFactory = _owner.ItemTemplateShim;
+                itemTemplateFactory = _owner.ItemTemplate;
             }
 
             var data = _owner.ItemsSourceView.GetAt(index);
@@ -618,18 +605,18 @@ namespace Avalonia.Controls.Repeaters
             // If we are phasing, run phase 0 before setting DataContext. If phase 0 is not 
             // run before setting DataContext, when setting DataContext all the phases will be
             // run in the OnDataContextChanged handler in code generated by the xaml compiler (code-gen).
-            var extension = CachedVisualTreeHelpers.GetDataTemplateComponent(element);
+            var extension = false; ////CachedVisualTreeHelpers.GetDataTemplateComponent(element);
             if (extension)
             {
-                // Clear out old data. 
-                extension.Recycle();
-                int nextPhase = VirtualizationInfo.PhaseReachedEnd;
-                // Run Phase 0
-                extension.ProcessBindings(data, index, 0 /* currentPhase */, nextPhase);
+                ////// Clear out old data. 
+                ////extension.Recycle();
+                ////int nextPhase = VirtualizationInfo.PhaseReachedEnd;
+                ////// Run Phase 0
+                ////extension.ProcessBindings(data, index, 0 /* currentPhase */, nextPhase);
 
-                // Setup phasing information, so that Phaser can pick up any pending phases left.
-                // Update phase on virtInfo. Set data and templateComponent only if x:Phase was used.
-                virtInfo->UpdatePhasingInfo(nextPhase, nextPhase > 0 ? data : null, nextPhase > 0 ? extension : null);
+                ////// Setup phasing information, so that Phaser can pick up any pending phases left.
+                ////// Update phase on virtInfo. Set data and templateComponent only if x:Phase was used.
+                ////virtInfo.UpdatePhasingInfo(nextPhase, nextPhase > 0 ? data : null, nextPhase > 0 ? extension : null);
             }
             else
             {
@@ -640,7 +627,7 @@ namespace Avalonia.Controls.Repeaters
             virtInfo.MoveOwnershipToLayoutFromElementFactory(
                 index,
                 /* uniqueId: */
-                _owner.ItemsSourceView.HasKeyIndexMapping() ?
+                _owner.ItemsSourceView.HasKeyIndexMapping ?
                 _owner.ItemsSourceView.KeyFromIndex(index) :
                 string.Empty);
 
@@ -653,12 +640,12 @@ namespace Avalonia.Controls.Repeaters
             var children = repeater.Children;
             if (element.VisualParent != repeater)
             {
-                children.Append(element);
+                children.Add(element);
             }
 
-            repeater.AnimationManager().OnElementPrepared(element);
+            ////repeater.AnimationManager.OnElementPrepared(element);
             repeater.OnElementPrepared(element, index);
-            _phaser.PhaseElement(element, virtInfo);
+            ////_phaser.PhaseElement(element, virtInfo);
 
             // Update realized indices
             _firstRealizedElementIndexHeldByLayout = Math.Min(_firstRealizedElementIndexHeldByLayout, index);
@@ -680,21 +667,23 @@ namespace Avalonia.Controls.Repeaters
 
         private bool ClearElementToAnimator(IControl element, VirtualizationInfo virtInfo)
         {
-            bool cleared = _owner.AnimationManager.ClearElement(element);
-            if (cleared)
-            {
-                int clearedIndex = virtInfo.Index;
-                virtInfo.MoveOwnershipToAnimator();
-                if (_lastFocusedElement == element)
-                {
-                    // Focused element is going away. Remove the tracked last focused element
-                    // and pick a reasonable next focus if we can find one within the layout 
-                    // realized elements.
-                    MoveFocusFromClearedIndex(clearedIndex);
-                }
-            }
-            return cleared;
+            return false;
+            ////bool cleared = _owner.AnimationManager.ClearElement(element);
+            ////if (cleared)
+            ////{
+            ////    int clearedIndex = virtInfo.Index;
+            ////    virtInfo.MoveOwnershipToAnimator();
+            ////    if (_lastFocusedElement == element)
+            ////    {
+            ////        // Focused element is going away. Remove the tracked last focused element
+            ////        // and pick a reasonable next focus if we can find one within the layout 
+            ////        // realized elements.
+            ////        MoveFocusFromClearedIndex(clearedIndex);
+            ////    }
+            ////}
+            ////return cleared;
         }
+
         private bool ClearElementToPinnedPool(IControl element, VirtualizationInfo virtInfo, bool isClearedDueToCollectionChange)
         {
             if (_isDataSourceStableResetPending)
@@ -771,7 +760,7 @@ namespace Avalonia.Controls.Repeaters
             var oldIndex = virtInfo.Index;
             if (oldIndex != index)
             {
-                virtInfo.UpdateIndex = index;
+                virtInfo.UpdateIndex(index);
                 _owner.OnElementIndexChanged(element, oldIndex, index);
             }
         }

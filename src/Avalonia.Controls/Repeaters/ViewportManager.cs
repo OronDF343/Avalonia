@@ -11,11 +11,9 @@ namespace Avalonia.Controls.Repeaters
             _owner = owner;
         }
 
-        public IControl SuggestedAnchor() => throw new NotImplementedException();
-        public double HorizontalCacheLength() => throw new NotImplementedException();
-        public void HorizontalCacheLength(double value) => throw new NotImplementedException();
-        public double VerticalCacheLength() => throw new NotImplementedException();
-        public void VerticalCacheLength(double value) => throw new NotImplementedException();
+        public IControl SuggestedAnchor { get; }
+        public double HorizontalCacheLength { get; set; }
+        public double VerticalCacheLength { get; set; }
         public Rect GetLayoutVisibleWindow() => throw new NotImplementedException();
         public Rect GetLayoutRealizationWindow() => throw new NotImplementedException();
         public void SetLayoutExtent(Rect extent) => throw new NotImplementedException();
@@ -28,6 +26,6 @@ namespace Avalonia.Controls.Repeaters
         public void OnMakeAnchor(IControl anchor, bool isAnchorOutsideRealizedRange) => throw new NotImplementedException();
         public void OnBringIntoViewRequested(RequestBringIntoViewEventArgs args) => throw new NotImplementedException();
         public void ResetScrollers() => throw new NotImplementedException();
-        public IControl MadeAnchor() => throw new NotImplementedException();
+        public IControl MadeAnchor { get; }
     };
 }

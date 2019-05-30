@@ -14,11 +14,8 @@ namespace Avalonia.Controls.Repeaters
 
         public bool HasKeyIndexMapping { get; }
 
-        event NotifyCollectionChangedEventHandler INotifyCollectionChanged.CollectionChanged
-        {
-            add => throw new NotImplementedException();
-            remove => throw new NotImplementedException();
-        }
+
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
 
         public object GetAt(int index)
         {

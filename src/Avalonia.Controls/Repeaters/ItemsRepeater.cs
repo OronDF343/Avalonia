@@ -24,15 +24,13 @@ namespace Avalonia.Controls.Repeaters
         private static readonly AttachedProperty<VirtualizationInfo> VirtualizationInfoProperty =
             AvaloniaProperty.RegisterAttached<ItemsRepeater, IControl, VirtualizationInfo>("VirtualizationInfo");
 
+        internal static readonly Rect InvalidRect = new Rect(-1, -1, -1, -1);
         private static readonly Point ClearedElementsArrangePosition = new Point(-10000.0, -10000.0);
-        private static readonly Rect InvalidRect = new Rect(-1, -1, -1, -1);
 
         private VirtualizingLayoutContext _layoutContext;
-        private object _layoutState;
         private NotifyCollectionChangedEventArgs _processingItemsSourceChange;
         private Size _lastAvailableSize;
         private bool _isLayoutInProgress;
-        private Point _layoutOrigin;
         private ViewManager _viewManager;
         private ViewportManager _viewportManager;
         private ItemsRepeaterElementPreparedEventArgs _elementPreparedArgs;
@@ -76,6 +74,11 @@ namespace Avalonia.Controls.Repeaters
         public ItemsSourceView ItemsSourceView { get; private set; }
 
         internal Controls Children { get; } = new Controls();
+        internal Point LayoutOrigin { get; set; }
+        internal object LayoutState { get; set; }
+        internal IControl MadeAnchor => _viewportManager.MadeAnchor;
+        internal Rect RealizationWindow => _viewportManager.GetLayoutRealizationWindow();
+        internal IControl SuggestedAnchor => _viewportManager.SuggestedAnchor;
 
         private bool IsProcessingCollectionChange => _processingItemsSourceChange != null;
 
@@ -165,7 +168,7 @@ namespace Avalonia.Controls.Repeaters
                     var layoutContext = GetLayoutContext();
 
                     desiredSize = layout.Measure(layoutContext, availableSize);
-                    extent = new Rect(_layoutOrigin.X, _layoutOrigin.Y, desiredSize.Width, desiredSize.Height);
+                    extent = new Rect(LayoutOrigin.X, LayoutOrigin.Y, desiredSize.Width, desiredSize.Height);
 
                     // Clear auto recycle candidate elements that have not been kept alive by layout - i.e layout did not
                     // call GetElementAt(index).
@@ -295,11 +298,11 @@ namespace Avalonia.Controls.Repeaters
             //}
             else if (property == HorizontalCacheLengthProperty)
             {
-                _viewportManager.HorizontalCache = (double)args.NewValue;
+                _viewportManager.HorizontalCacheLength = (double)args.NewValue;
             }
             else if (property == VerticalCacheLengthProperty)
             {
-                _viewportManager.VerticalCache = (double)args.NewValue;
+                _viewportManager.VerticalCacheLength = (double)args.NewValue;
             }
             else
             {
@@ -307,13 +310,13 @@ namespace Avalonia.Controls.Repeaters
             }
         }
 
-        private IControl GetElementImpl(int index, bool forceCreate, bool supressAutoRecycle)
+        internal IControl GetElementImpl(int index, bool forceCreate, bool supressAutoRecycle)
         {
             var element = _viewManager.GetElement(index, forceCreate, supressAutoRecycle);
             return element;
         }
 
-        private void ClearElementImpl(IControl element)
+        internal void ClearElementImpl(IControl element)
         {
             // Clearing an element due to a collection change
             // is more strict in that pinned elements will be forcibly
@@ -384,7 +387,7 @@ namespace Avalonia.Controls.Repeaters
             return element;
         }
 
-        private void OnElementPrepared(IControl element, int index)
+        internal void OnElementPrepared(IControl element, int index)
         {
             _viewportManager.OnElementPrepared(element);
             if (ElementPrepared != null)
@@ -402,7 +405,7 @@ namespace Avalonia.Controls.Repeaters
             }
         }
 
-        private void OnElementClearing(IControl element)
+        internal void OnElementClearing(IControl element)
         {
             if (ElementClearing != null)
             {
@@ -419,7 +422,7 @@ namespace Avalonia.Controls.Repeaters
             }
         }
 
-        private void OnElementIndexChanged(IControl element, int oldIndex, int newIndex)
+        internal void OnElementIndexChanged(IControl element, int oldIndex, int newIndex)
         {
             if (ElementIndexChanged != null)
             {
@@ -447,12 +450,12 @@ namespace Avalonia.Controls.Repeaters
 
             if (oldValue != null)
             {
-                oldValue.CollectionChanged -= OnItemsSosurceViewChanged;
+                oldValue.CollectionChanged -= OnItemsSourceViewChanged;
             }
 
             if (newValue != null)
             {
-                newValue.CollectionChanged += OnItemsSosurceViewChanged;
+                newValue.CollectionChanged += OnItemsSourceViewChanged;
             }
 
             if (Layout != null)
@@ -547,7 +550,7 @@ namespace Avalonia.Controls.Repeaters
                     }
                 }
 
-                _layoutState = null;
+                LayoutState = null;
             }
 
             if (newValue != null)
