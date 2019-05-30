@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Text;
+using Avalonia.Controls.Utils;
 
 namespace Avalonia.Controls.Repeaters
 {
