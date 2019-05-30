@@ -19,7 +19,7 @@ namespace Avalonia.Controls.Repeaters
 
         protected virtual Size ArrangeOverride(VirtualizingLayoutContext context, Size finalSize) => finalSize;
 
-        protected virtual void OnItemsChangedCore(
+        protected internal virtual void OnItemsChangedCore(
             VirtualizingLayoutContext context,
             object source,
             NotifyCollectionChangedEventArgs args) => InvalidateMeasure();

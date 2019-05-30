@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Avalonia.Controls.Repeaters
 {
-    internal class RepeaterLayoutContext : LayoutContext
+    internal class RepeaterLayoutContext : VirtualizingLayoutContext
     {
         private readonly ItemsRepeater _owner;
 
