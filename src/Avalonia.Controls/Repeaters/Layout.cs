@@ -4,6 +4,8 @@ namespace Avalonia.Controls.Repeaters
 {
     public class Layout : AvaloniaObject
     {
+        public string LayoutId { get; set; }
+
         public void InitializeForContext(LayoutContext context)
         {
 

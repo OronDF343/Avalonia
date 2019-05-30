@@ -13,13 +13,27 @@ namespace Avalonia.Controls.Repeaters
         private int _firstRealizedDataIndex;
         private VirtualizingLayoutContext _context;
 
+        private bool IsVirtualizingContext
+        {
+            get
+            {
+                if (_context != null)
+                {
+                    var rect = _context.RealizationRect;
+                    bool hasInfiniteSize = double.IsInfinity(rect.Height) || double.IsInfinity(rect.Width);
+                    return !hasInfiniteSize;
+                }
+                return false;
+            }
+        }
+
         public void SetContext(VirtualizingLayoutContext virtualContext) => _context = virtualContext;
 
         public void OnBeginMeasure(Orientation orientation)
         {
             if (_context != null)
             {
-                if (IsVirtualizingContext())
+                if (IsVirtualizingContext)
                 {
                     // We proactively clear elements laid out outside of the realizaton
                     // rect so that they are available for reuse during the current
@@ -47,14 +61,14 @@ namespace Avalonia.Controls.Repeaters
 
         public int GetRealizedElementCount()
         {
-            return IsVirtualizingContext() ? _realizedElements.Count : _context.ItemCount;
+            return IsVirtualizingContext ? _realizedElements.Count : _context.ItemCount;
         }
 
         public IControl GetAt(int realizedIndex)
         {
             IControl element;
 
-            if (IsVirtualizingContext())
+            if (IsVirtualizingContext)
             {
                 if (_realizedElements[realizedIndex] == null)
                 {
@@ -172,7 +186,7 @@ namespace Avalonia.Controls.Repeaters
 
         public bool IsDataIndexRealized(int index)
         {
-            if (IsVirtualizingContext())
+            if (IsVirtualizingContext)
             {
                 int realizedCount = GetRealizedElementCount();
                 return
@@ -191,7 +205,7 @@ namespace Avalonia.Controls.Repeaters
 
         public IControl GetRealizedElement(int dataIndex)
         {
-            return IsVirtualizingContext() ?
+            return IsVirtualizingContext ?
                 GetAt(GetRealizedRangeIndexFromDataIndex(dataIndex)) : 
                 _context.GetOrCreateElementAt(
                     dataIndex,
@@ -287,12 +301,12 @@ namespace Avalonia.Controls.Repeaters
 
         public int GetDataIndexFromRealizedRangeIndex(int rangeIndex)
         {
-            return IsVirtualizingContext() ? rangeIndex + _firstRealizedDataIndex : rangeIndex;
+            return IsVirtualizingContext ? rangeIndex + _firstRealizedDataIndex : rangeIndex;
         }
 
         private int GetRealizedRangeIndexFromDataIndex(int dataIndex)
         {
-            return IsVirtualizingContext() ? dataIndex - _firstRealizedDataIndex : dataIndex;
+            return IsVirtualizingContext ? dataIndex - _firstRealizedDataIndex : dataIndex;
         }
 
         private void DiscardElementsOutsideWindow(in Rect window, Orientation orientation)
@@ -407,17 +421,6 @@ namespace Avalonia.Controls.Repeaters
             {
                 _firstRealizedDataIndex -= count;
             }
-        }
-
-        private bool IsVirtualizingContext()
-        {
-            if (_context != null)
-            {
-                var rect = _context.RealizationRect;
-                bool hasInfiniteSize = double.IsInfinity(rect.Height) || double.IsInfinity(rect.Width);
-                return !hasInfiniteSize;
-            }
-            return false;
         }
     }
 }
