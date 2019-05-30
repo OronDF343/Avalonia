@@ -7,27 +7,28 @@ namespace Avalonia.Controls.Repeaters
     public class StackLayoutState
     {
         private const int BufferSize = 100;
-        private readonly FlowLayoutAlgorithm _flowAlgorithm = new FlowLayoutAlgorithm();
         private readonly List<double> _estimationBuffer = new List<double>();
-        private double _totalElementSize;
-        private double _maxArrangeBounds;
-        private int _totalElementsMeasured;
+
+        internal FlowLayoutAlgorithm FlowAlgorithm { get; } = new FlowLayoutAlgorithm();
+        internal double MaxArrangeBounds { get; private set; }
+        internal int TotalElementsMeasured { get; private set; }
+        internal double TotalElementSize { get; private set; }
 
         internal void InitializeForContext(VirtualizingLayoutContext context, IFlowLayoutAlgorithmDelegates callbacks)
         {
-            _flowAlgorithm.InitializeForContext(context, callbacks);
+            FlowAlgorithm.InitializeForContext(context, callbacks);
 
             if (_estimationBuffer.Count == 0)
             {
                 _estimationBuffer.AddRange(Enumerable.Repeat(0.0, BufferSize));
             }
 
-            //context.LayoutStateCore(this);
+            context.LayoutState = this;
         }
 
         internal void UninitializeForContext(VirtualizingLayoutContext context)
         {
-            _flowAlgorithm.UninitializeForContext(context);
+            FlowAlgorithm.UninitializeForContext(context);
         }
 
         internal void OnElementMeasured(int elementIndex, double majorSize, double minorSize)
@@ -37,16 +38,16 @@ namespace Avalonia.Controls.Repeaters
 
             if (!alreadyMeasured)
             {
-                _totalElementsMeasured++;
+                TotalElementsMeasured++;
             }
 
-            _totalElementSize -= _estimationBuffer[estimationBufferIndex];
-            _totalElementSize += majorSize;
+            TotalElementSize -= _estimationBuffer[estimationBufferIndex];
+            TotalElementSize += majorSize;
             _estimationBuffer[estimationBufferIndex] = majorSize;
 
-            _maxArrangeBounds = Math.Max(_maxArrangeBounds, minorSize);
+            MaxArrangeBounds = Math.Max(MaxArrangeBounds, minorSize);
         }
 
-        internal void OnArrangeLayoutEnd() => _maxArrangeBounds = 0;
+        internal void OnArrangeLayoutEnd() => MaxArrangeBounds = 0;
     }
 }

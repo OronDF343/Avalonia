@@ -7,7 +7,7 @@ using Avalonia.Media;
 
 namespace Avalonia.Controls.Repeaters
 {
-    public class ItemsRepeater : Panel
+    public class ItemsRepeater : Control
     {
         public static readonly AvaloniaProperty<IBrush> BackgroundProperty =
             Border.BackgroundProperty.AddOwner<ItemsRepeater>();
@@ -23,6 +23,7 @@ namespace Avalonia.Controls.Repeaters
         private static readonly AttachedProperty<VirtualizationInfo> VirtualizationInfoProperty =
             AvaloniaProperty.RegisterAttached<ItemsRepeater, IControl, VirtualizationInfo>("VirtualizationInfo");
 
+        private readonly Controls _children = new Controls();
         private bool _isLayoutInProgress;
         private LayoutContext _layoutContext;
         private object _layoutState;
@@ -138,10 +139,9 @@ namespace Avalonia.Controls.Repeaters
                 oldValue.ArrangeInvalidated -= InvalidateArrangeForLayout;
         
                 // Walk through all the elements and make sure they are cleared
-                var children = Children;
-                for (var i = 0; i < children.Count; ++i)
+                for (var i = 0; i < _children.Count; ++i)
                 {
-                    var element = children[i];
+                    var element = _children[i];
                     if (GetVirtualizationInfo(element).IsRealized)
                     {
                         ClearElementImpl(element);

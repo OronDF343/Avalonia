@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Avalonia.Controls.Repeaters
+﻿namespace Avalonia.Controls.Repeaters
 {
     internal class OrientationBasedMeasures
     {
@@ -16,6 +12,7 @@ namespace Avalonia.Controls.Repeaters
         public double MinorStart(in Rect rect) => ScrollOrientation == Orientation.Vertical ? rect.X : rect.Y;
         public double MajorEnd(in Rect rect) => ScrollOrientation == Orientation.Vertical ? rect.Bottom : rect.Right;
         public double MinorEnd(in Rect rect) => ScrollOrientation == Orientation.Vertical ? rect.Right : rect.Bottom;
+
         public void SetMajorSize(ref Rect rect, double value)
         {
             if (ScrollOrientation == Orientation.Vertical)
@@ -25,6 +22,18 @@ namespace Avalonia.Controls.Repeaters
             else
             {
                 rect = rect.WithWidth(value);
+            }
+        }
+
+        public void SetMinorSize(ref Rect rect, double value)
+        {
+            if (ScrollOrientation == Orientation.Vertical)
+            {
+                rect = rect.WithWidth(value);
+            }
+            else
+            {
+                rect = rect.WithHeight(value);
             }
         }
 
@@ -57,6 +66,13 @@ namespace Avalonia.Controls.Repeaters
             return ScrollOrientation == Orientation.Vertical ?
                 new Point(minor, major) :
                 new Point(major, minor);
+        }
+
+        public Size MinorMajorSize(double minor, double major)
+        {
+            return ScrollOrientation == Orientation.Vertical ?
+                new Size(minor, major) :
+                new Size(major, minor);
         }
     }
 }

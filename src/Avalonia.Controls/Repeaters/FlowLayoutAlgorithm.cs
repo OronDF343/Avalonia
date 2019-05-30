@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Text;
 
 namespace Avalonia.Controls.Repeaters
 {
@@ -25,6 +23,8 @@ namespace Avalonia.Controls.Repeaters
         // feature until someone asks for it - This is not a common scenario
         // anyway. 
         private bool _scrollOrientationSameAsFlow;
+
+        public Rect LastExtent => _lastExtent;
 
         private bool IsVirtualizingContext
         {
